@@ -1,5 +1,7 @@
 package CS6650.as2.rest;
 
+import CS6650.as2.model.RFIDLiftData;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
@@ -15,15 +17,6 @@ public class Hello {
         return "hello jersey! Get!";
     }
 
-    @POST
-    @Path("post_test")
-    @Produces(MediaType.TEXT_PLAIN)
-    @Consumes(MediaType.APPLICATION_JSON)
-    //@Produces(MediaType.APPLICATION_JSON)
-    public String postTest() {
-        return "hello jersey! Post!";
-    }
-
     @GET
     @Path("myvert/{skierID}&{dayNum}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -33,10 +26,17 @@ public class Hello {
 
     @POST
     @Path("load")
-    @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
-    //@Produces(MediaType.APPLICATION_JSON)
-    public String load() {
-        return "hello jersey! Post!";
+    @Produces(MediaType.TEXT_PLAIN)
+    public String load(RFIDLiftData data) {
+        return "Load " + data.toString();
+    }
+
+    @POST
+    @Path("test_post")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public String load2(String s) {
+        return "haha " + s;
     }
 }
