@@ -2,7 +2,6 @@ package CS6650.as2.rest;
 
 import CS6650.as2.dal.RecordDao;
 import CS6650.as2.model.MyVert;
-import CS6650.as2.model.RFIDLiftData;
 import CS6650.as2.model.Record;
 
 import javax.ws.rs.*;
@@ -17,18 +16,10 @@ public class Hello {
     DataController dataController = new DataController();
 
     @GET
-    @Path("get_test")
+    @Path("test")
     @Produces(MediaType.TEXT_PLAIN)
     public String getTest() {
-        return "hello jersey! Get!";
-    }
-
-    @POST
-    @Path("test_post")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public String load2(String s) {
-        return "haha " + s;
+        return "Welcome to Blackler-Whistcomb Ski Resort!";
     }
 
     @GET
@@ -44,12 +35,12 @@ public class Hello {
     @Path("load")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
-    public String load(RFIDLiftData data) {
+    public String load(Record data) {
         try {
-            RecordDao.getInstance().create(new Record(data.getSkierID(), data.getLiftID(),data.getDayNum()));
+            RecordDao.getInstance().create(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return "Load " + data.toString();
+        return "Load>>> " + data.toString();
     }
 }

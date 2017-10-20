@@ -9,6 +9,7 @@ public class Record {
     private int skierID;
     private int liftID;
     private int dayNum;
+    private int time;
 
     public Record() {
     }
@@ -17,17 +18,19 @@ public class Record {
         this.recordID = recordID;
     }
 
-    public Record(int skierID, int liftID, int dayNum) {
+    public Record(int skierID, int liftID, int dayNum, int time) {
         this.skierID = skierID;
         this.liftID = liftID;
         this.dayNum = dayNum;
+        this.time = time;
     }
 
-    public Record(int recordID, int skierID, int liftID, int dayNum) {
+    public Record(int recordID, int skierID, int liftID, int dayNum, int time) {
         this.recordID = recordID;
         this.skierID = skierID;
         this.liftID = liftID;
         this.dayNum = dayNum;
+        this.time = time;
     }
 
     public int getRecordID() {
@@ -59,6 +62,21 @@ public class Record {
     }
 
     public void setDayNum(int dayNum) {
+
         this.dayNum = dayNum;
+    }
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    @Override
+    public String toString() {
+        return "RecordID: " + this.recordID + "  SkierID: " + this.skierID + "  Lift: " +
+                this.liftID + "  Day: " + this.dayNum + "  Time: " + this.time;
     }
 }
