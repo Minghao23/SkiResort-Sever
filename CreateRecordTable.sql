@@ -1,4 +1,4 @@
-USE SkiReSort;
+USE SkiResort;
 
 DROP TABLE IF EXISTS Record;
 
@@ -7,5 +7,6 @@ CREATE TABLE Record (
     SkierID INT,
     LiftID INT,
     DayNum INT,
+    Time INT,
     CONSTRAINT pk_Record_RecordID PRIMARY KEY (RecordID)
 );

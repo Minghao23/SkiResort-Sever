@@ -25,7 +25,7 @@ public class RecordDao {
     }
 
     public Record create(Record record) throws SQLException {
-        String insertRecord = "INSERT Record(SkierID,LiftID,DayNum) VALUE (?,?,?);";
+        String insertRecord = "INSERT Record(SkierID,LiftID,DayNum,Time) VALUE (?,?,?,?);";
         Connection connection = null;
         PreparedStatement insertStmt = null;
         ResultSet results = null;
@@ -36,6 +36,7 @@ public class RecordDao {
             insertStmt.setInt(1, record.getSkierID());
             insertStmt.setInt(2, record.getLiftID());
             insertStmt.setInt(3, record.getDayNum());
+            insertStmt.setInt(4, record.getTime());
             insertStmt.executeUpdate();
 
             results = insertStmt.getGeneratedKeys();
