@@ -32,9 +32,6 @@ public class Hello {
     public MyVert getRecord(
             @PathParam("skierID") int skierID,
             @PathParam("dayNum") int dayNum) {
-        if(dayNum == TODAY && dataController.getMEMSize() > 0) {
-            return dataController.getMyVerticalFromMEM(skierID, dayNum);
-        }
         return dataController.getMyVerticalFromDB(skierID, dayNum);
     }
 
@@ -43,14 +40,14 @@ public class Hello {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String load(Record data) {
-        dataController.addNewRecordToMEM(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
-        System.out.println(dataController.getMEMSize());
+        dataController.addNewRecordToQueue(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
+        System.out.println(dataController.getQueueSize());
         return "Load>>> " + data.toString();
     }
 
-    @GET
-    @Path("endPost")
-    public void storeData() {
-        dataController.updateDB();
-    }
+//    @GET
+//    @Path("endPost")
+//    public void storeData() {
+//        dataController.updateDB();
+//    }
 }
