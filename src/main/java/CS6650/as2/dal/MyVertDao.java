@@ -58,7 +58,7 @@ public class MyVertDao {
 
     public MyVert getMyVert(Connection connection, int skierID, int dayNum) throws SQLException {
         MyVert myVert = null;
-        String selectRecords = "SELECT * FROM Record WHERE SkierID=? && DayNum=?;";
+        String selectRecords = "SELECT * FROM MyVert WHERE SkierID=? && DayNum=?;";
         try {
             PreparedStatement selectStmt = connection.prepareStatement(selectRecords);
             selectStmt.setInt(1, skierID);

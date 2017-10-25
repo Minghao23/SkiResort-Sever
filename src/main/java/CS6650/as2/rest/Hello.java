@@ -11,7 +11,6 @@ import javax.ws.rs.core.MediaType;
  */
 @Path("/hello")
 public class Hello {
-    static final int TODAY = 2; // assume that today is Day2
     DataController dataController;
 
     public Hello() {
@@ -29,7 +28,7 @@ public class Hello {
     @GET
     @Path("myvert/{skierID}&{dayNum}")
     @Produces(MediaType.APPLICATION_JSON)
-    public MyVert getRecord(
+    public MyVert getMyVert(
             @PathParam("skierID") int skierID,
             @PathParam("dayNum") int dayNum) {
         return dataController.getMyVerticalFromDB(skierID, dayNum);
@@ -40,14 +39,8 @@ public class Hello {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String load(Record data) {
-        dataController.addNewRecordToQueue(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
-        System.out.println(dataController.getQueueSize());
+        dataController.addTaskToWorkQueue(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
         return "Load>>> " + data.toString();
     }
 
-//    @GET
-//    @Path("endPost")
-//    public void storeData() {
-//        dataController.updateDB();
-//    }
 }
