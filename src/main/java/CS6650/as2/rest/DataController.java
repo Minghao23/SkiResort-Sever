@@ -4,6 +4,7 @@ import CS6650.as2.dal.ConnectionManager;
 import CS6650.as2.dal.MyVertDao;
 import CS6650.as2.model.MyVert;
 import CS6650.as2.model.Record;
+import CS6650.as2.util.Stat;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -28,6 +29,7 @@ public class DataController {
     Connection connectionForRecord;
     Connection connectionForMyVert;
     Connection connectionForGET;
+    Stat stat;
 
     public DataController() {
         try {
@@ -39,6 +41,7 @@ public class DataController {
         }
         recordTaskPoolExecutor = Executors.newFixedThreadPool(100);
         myVertTaskPoolExecutor = Executors.newSingleThreadExecutor();
+        stat = new Stat();
     }
 
     public synchronized void addTaskToWorkQueue(Record record) {
@@ -49,7 +52,9 @@ public class DataController {
     public MyVert getMyVerticalFromDB(int skierID, int dayNum) {
         MyVert myVert = null;
         try {
+            long startTime = System.currentTimeMillis();
             myVert = MyVertDao.getInstance().getMyVert(connectionForGET, skierID, dayNum);
+            Stat.getInstance().recordDBLatency(System.currentTimeMillis() - startTime);
         } catch (SQLException e) {
             e.printStackTrace();
         }

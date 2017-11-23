@@ -7,9 +7,9 @@ import java.util.Properties;
 
 public class ConnectionManager {
 
-	private final String user = "root";
+	private final String user = "hmh";
 	private final String password = "931028hmh";
-	private final String hostName = "localhost";
+	private final String hostName = "mydbinstance.criv8gqrr27f.us-west-2.rds.amazonaws.com";
 	private final int port= 3306;
 	private final String schema = "SkiResort";
 

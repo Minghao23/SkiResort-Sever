@@ -29,16 +29,17 @@ public class RecordDao {
             insertStmt.setInt(4, record.getTime());
             insertStmt.executeUpdate();
 
-            ResultSet results = insertStmt.getGeneratedKeys();
-            int recordID = -1;
-            if(results.next()) {
-                recordID = results.getInt(1);
-            } else {
-                throw new SQLException("Unable to retrieve auto-generated key.");
-            }
-            record.setRecordID(recordID);
+            // No need to return a resultset for a create function
+//            ResultSet results = insertStmt.getGeneratedKeys();
+//            int recordID = -1;
+//            if(results.next()) {
+//                recordID = results.getInt(1);
+//            } else {
+//                throw new SQLException("Unable to retrieve auto-generated key.");
+//            }
+//            record.setRecordID(recordID);
             insertStmt.close();
-            results.close();
+//            results.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }

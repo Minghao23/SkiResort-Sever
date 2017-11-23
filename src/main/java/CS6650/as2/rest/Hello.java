@@ -2,6 +2,7 @@ package CS6650.as2.rest;
 
 import CS6650.as2.model.MyVert;
 import CS6650.as2.model.Record;
+import CS6650.as2.util.Stat;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -39,7 +40,13 @@ public class Hello {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
     public String load(Record data) {
-        dataController.addTaskToWorkQueue(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
+        try{
+            long startTime = System.currentTimeMillis();
+            dataController.addTaskToWorkQueue(new Record(data.getSkierID(), data.getLiftID(), data.getDayNum(), data.getTime()));
+            Stat.getInstance().recordHttpLatency(System.currentTimeMillis() - startTime);
+        }catch (Exception e) {
+            Stat.getInstance().recordFailNum();
+        }
         return "Load>>> " + data.toString();
     }
 

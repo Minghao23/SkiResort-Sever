@@ -2,6 +2,7 @@ package CS6650.as2.rest;
 
 import CS6650.as2.dal.MyVertDao;
 import CS6650.as2.model.Record;
+import CS6650.as2.util.Stat;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -21,7 +22,9 @@ public class MyVertTask implements Runnable {
     @Override
     public void run() {
         try {
+            long startTime = System.currentTimeMillis();
             MyVertDao.getInstance().update(connection, record);
+            Stat.getInstance().recordDBLatency(System.currentTimeMillis() - startTime);
         } catch (SQLException e) {
             e.printStackTrace();
         }
