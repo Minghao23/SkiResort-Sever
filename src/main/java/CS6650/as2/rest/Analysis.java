@@ -25,29 +25,59 @@ public class Analysis {
     @Path("http")
     @Produces(MediaType.APPLICATION_JSON)
     public HttpAnalysis getHttpAnalysis() {
-        return new HttpAnalysis(stat.getHttpRequestNum(),
-                stat.getFailNum(),
-                stat.getHttpMeanLatency(),
-                stat.getHttpMedianLatency(),
-                stat.getHttp95thLatency(),
-                stat.getHttp99thLatency());
+        System.out.println(stat.getHttpMeanLatency().getOrDefault("all", new Long(0)));
+        System.out.println(stat.getHttp99thLatency().getOrDefault("all", new Long(0)));
+        return new HttpAnalysis(
+                stat.getSuccessHttpRequestNum().getOrDefault("1", new Long(0)),
+                stat.getSuccessHttpRequestNum().getOrDefault("2", new Long(0)),
+                stat.getSuccessHttpRequestNum().getOrDefault("3", new Long(0)),
+                stat.getSuccessHttpRequestNum().getOrDefault("all", new Long(0)),
+                stat.getFailNum().getOrDefault("1", new Long(0)),
+                stat.getFailNum().getOrDefault("2", new Long(0)),
+                stat.getFailNum().getOrDefault("3", new Long(0)),
+                stat.getFailNum().getOrDefault("all", new Long(0)),
+                stat.getHttpMeanLatency().getOrDefault("1", new Long(0)),
+                stat.getHttpMeanLatency().getOrDefault("2", new Long(0)),
+                stat.getHttpMeanLatency().getOrDefault("3", new Long(0)),
+                stat.getHttpMeanLatency().getOrDefault("all", new Long(0)),
+                stat.getHttpMedianLatency().getOrDefault("1", new Long(0)),
+                stat.getHttpMedianLatency().getOrDefault("2", new Long(0)),
+                stat.getHttpMedianLatency().getOrDefault("3", new Long(0)),
+                stat.getHttpMedianLatency().getOrDefault("all", new Long(0)),
+                stat.getHttp95thLatency().getOrDefault("1", new Long(0)),
+                stat.getHttp95thLatency().getOrDefault("2", new Long(0)),
+                stat.getHttp95thLatency().getOrDefault("3", new Long(0)),
+                stat.getHttp95thLatency().getOrDefault("all", new Long(0)),
+                stat.getHttp99thLatency().getOrDefault("1", new Long(0)),
+                stat.getHttp99thLatency().getOrDefault("2", new Long(0)),
+                stat.getHttp99thLatency().getOrDefault("3", new Long(0)),
+                stat.getHttp99thLatency().getOrDefault("all", new Long(0)));
     }
 
     @GET
     @Path("db")
     @Produces(MediaType.APPLICATION_JSON)
     public DBAnalysis getDBAnalysis() {
-        return new DBAnalysis(stat.getDBQueryNum(),
-                stat.getDBMeanLatency(),
-                stat.getDBMedianLatency(),
-                stat.getDB95thLatency(),
-                stat.getDB99thLatency());
+        return new DBAnalysis(
+                stat.getDBQueryNum().getOrDefault("1", new Long(0)),
+                stat.getDBQueryNum().getOrDefault("2", new Long(0)),
+                stat.getDBQueryNum().getOrDefault("3", new Long(0)),
+                stat.getDBQueryNum().getOrDefault("all", new Long(0)),
+                stat.getDBMeanLatency().getOrDefault("1", new Long(0)),
+                stat.getDBMeanLatency().getOrDefault("2", new Long(0)),
+                stat.getDBMeanLatency().getOrDefault("3", new Long(0)),
+                stat.getDBMeanLatency().getOrDefault("all", new Long(0)),
+                stat.getDBMedianLatency().getOrDefault("1", new Long(0)),
+                stat.getDBMedianLatency().getOrDefault("2", new Long(0)),
+                stat.getDBMedianLatency().getOrDefault("3", new Long(0)),
+                stat.getDBMedianLatency().getOrDefault("all", new Long(0)),
+                stat.getDB95thLatency().getOrDefault("1", new Long(0)),
+                stat.getDB95thLatency().getOrDefault("2", new Long(0)),
+                stat.getDB95thLatency().getOrDefault("3", new Long(0)),
+                stat.getDB95thLatency().getOrDefault("all", new Long(0)),
+                stat.getDB99thLatency().getOrDefault("1", new Long(0)),
+                stat.getDB99thLatency().getOrDefault("2", new Long(0)),
+                stat.getDB99thLatency().getOrDefault("3", new Long(0)),
+                stat.getDB99thLatency().getOrDefault("all", new Long(0)));
     }
-
-    @GET
-    @Path("clear")
-    public void clear() {
-        stat.clearAll();
-    }
-
 }

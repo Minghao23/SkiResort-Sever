@@ -1,8 +1,17 @@
 package CS6650.as2.util;
 
+import CS6650.as2.dal.ConnectionManager;
+import CS6650.as2.dal.DBLatencyDao;
+import CS6650.as2.dal.HttpLatencyDao;
+import CS6650.as2.dal.LatencyDao;
+import CS6650.as2.rest.StatTask;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by hu_minghao on 11/22/17.
@@ -18,126 +27,141 @@ public class Stat {
         return instance;
     }
 
-    private int failNum = 0;
-    private long totalHttpLatency = 0;
-    private long totalDBLatency = 0;
-    private boolean isHttpSorted = false;
-    private boolean isDBSorted = false;
-    private List<Long> httpLatencies = new ArrayList<Long>();
-    private List<Long> DBLatencies = new ArrayList<Long>();
-//    private final String HttpFile = "";
-//    private final String DBFile = "";
+    ExecutorService statTaskPoolExecutor;
+    Connection connectionForAnalysis;
+    HttpLatencyDao httpLatencyDao;
+    DBLatencyDao dbLatencyDao;
+    final String SERVER = "3";
 
-
-//    synchronized public void writeToFile(String FileURL, long content) {
-//        try {
-//            FileWriter writer = new FileWriter(FileURL, true);
-//            writer.write("" + content + "\n");
-//            writer.close();
-//        }catch(IOException ioe){
-//            ioe.printStackTrace();
-//        }
-//    }
-    synchronized public void recordHttpLatency(long latency) {
-        totalHttpLatency += latency;
-        httpLatencies.add(latency);
-        isHttpSorted = false;
-    }
-
-    synchronized public void recordDBLatency(long latency) {
-        totalDBLatency += latency;
-        DBLatencies.add(latency);
-        isDBSorted = false;
-    }
-
-    synchronized public void recordFailNum() {
-        failNum++;
-    }
-
-    public int getFailNum() {
-        return failNum;
-    }
-
-    public int getHttpRequestNum() {
-        return httpLatencies.size() + failNum;
-    }
-
-    public int getDBQueryNum() {
-        return DBLatencies.size();
-    }
-
-    public void clearAll() {
-        failNum = 0;
-        totalHttpLatency = 0;
-        totalDBLatency = 0;
-        isHttpSorted = false;
-        isDBSorted = false;
-        httpLatencies.clear();
-        DBLatencies.clear();
-    }
-
-    public long getMeanLatency(long totalLatency, int num) {
-        if(num == 0) {
-            return 0;
+    public Stat() {
+        try {
+            connectionForAnalysis = new ConnectionManager().getConnection();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return totalLatency / num;
+        statTaskPoolExecutor = Executors.newFixedThreadPool(100);
+        httpLatencyDao = HttpLatencyDao.getInstance();
+        dbLatencyDao = DBLatencyDao.getInstance();
     }
 
-    public long getMedianLatency(List<Long> latencies, boolean isSorted) {
-        if (!isSorted) {
-            Collections.sort(latencies);
-            isSorted = true;
-        }
-
-        return latencies.get(latencies.size() / 2);
+    public void recordHttpLatency(long latency) {
+        statTaskPoolExecutor.submit(new StatTask(connectionForAnalysis, latency, false, SERVER));
     }
 
-    public long get95thLatency(List<Long> latencies, boolean isSorted) {
-        if (!isSorted) {
-            Collections.sort(latencies);
-            isSorted = true;
+    public void recordDBLatency(long latency) {
+        try {
+            dbLatencyDao.create(connectionForAnalysis, latency, SERVER);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-
-        return latencies.get((int)Math.floor(latencies.size() * 0.95));
     }
 
-    public long get99thLatency(List<Long> latencies, boolean isSorted) {
-        if (!isSorted) {
-            Collections.sort(latencies);
-            isSorted = true;
-        }
+    public void recordFailNum() {
+        statTaskPoolExecutor.submit(new StatTask(connectionForAnalysis, 0, true, SERVER));
+    }
 
-        return latencies.get((int)Math.floor(latencies.size() * 0.99));
+    public HashMap<String, Long> getFailNum() {
+        HashMap<String, Long> result = new HashMap<>();
+        try {
+            result = httpLatencyDao.getFailedRequestNum(connectionForAnalysis);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public HashMap<String, Long> getSuccessHttpRequestNum() {
+        HashMap<String, Long> result = new HashMap<>();
+        try {
+            result = httpLatencyDao.getSuccessRequestNum(connectionForAnalysis);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public HashMap<String, Long> getDBQueryNum() {
+        HashMap<String, Long> result = new HashMap<>();
+        try {
+            result = dbLatencyDao.getQueryNum(connectionForAnalysis);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    public HashMap<String, Long> getMeanLatency(LatencyDao dao) {
+        HashMap<String, Long> result = new HashMap<>();
+        try {
+            result = dao.getMeanLatency(connectionForAnalysis);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private void getLatenciesAndCalculatePercent(HashMap<String, Long> result, LatencyDao dao, double percent) {
+        try {
+            ArrayList<Long> latencies1 = dao.getLatencies(connectionForAnalysis, "1");
+            result.put("1", latencies1.isEmpty() ? new Long(0) : latencies1.get((int)Math.floor(latencies1.size() * percent)));
+            ArrayList<Long> latencies2 = dao.getLatencies(connectionForAnalysis, "2");
+            result.put("2", latencies2.isEmpty() ? new Long(0) : latencies2.get((int)Math.floor(latencies2.size() * percent)));
+            ArrayList<Long> latencies3 = dao.getLatencies(connectionForAnalysis, "3");
+            result.put("3", latencies3.isEmpty() ? new Long(0) : latencies3.get((int)Math.floor(latencies3.size() * percent)));
+            ArrayList<Long> latenciesAll = new ArrayList<>();
+            latenciesAll.addAll(latencies1);
+            latenciesAll.addAll(latencies2);
+            latenciesAll.addAll(latencies3);
+            result.put("all", latenciesAll.isEmpty() ? new Long(0) : latenciesAll.get((int)Math.floor(latenciesAll.size() * percent)));
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    public HashMap<String, Long> getMedianLatency(LatencyDao dao) {
+        HashMap<String, Long> result = new HashMap<>();
+        getLatenciesAndCalculatePercent(result, dao, 0.5);
+        return result;
+    }
+
+    public HashMap<String, Long> get95thLatency(LatencyDao dao) {
+        HashMap<String, Long> result = new HashMap<>();
+        getLatenciesAndCalculatePercent(result, dao, 0.95);
+        return result;
+    }
+
+    public HashMap<String, Long> get99thLatency(LatencyDao dao) {
+        HashMap<String, Long> result = new HashMap<>();
+        getLatenciesAndCalculatePercent(result, dao, 0.99);
+        return result;
     }
 
     // Stat of Http requests
-    public long getHttpMeanLatency() {
-        return getMeanLatency(totalHttpLatency, this.httpLatencies.size());
+    public HashMap<String, Long> getHttpMeanLatency() {
+        return getMeanLatency(httpLatencyDao);
     }
 
-    public long getHttpMedianLatency() {
-        return getMedianLatency(this.httpLatencies, this.isHttpSorted);
+    public HashMap<String, Long> getHttpMedianLatency() {
+        return getMedianLatency(httpLatencyDao);
     }
-    public long getHttp95thLatency() {
-        return get95thLatency(this.httpLatencies, this.isHttpSorted);
+    public HashMap<String, Long> getHttp95thLatency() {
+        return get95thLatency(httpLatencyDao);
     }
-    public long getHttp99thLatency() {
-        return get99thLatency(this.httpLatencies, this.isHttpSorted);
+    public HashMap<String, Long> getHttp99thLatency() {
+        return get99thLatency(httpLatencyDao);
     }
 
     // Stat of DB queries
-    public long getDBMeanLatency() {
-        return getMeanLatency(totalDBLatency, this.DBLatencies.size());
+    public HashMap<String, Long> getDBMeanLatency() {
+        return getMeanLatency(dbLatencyDao);
     }
 
-    public long getDBMedianLatency() {
-        return getMedianLatency(this.DBLatencies, this.isDBSorted);
+    public HashMap<String, Long> getDBMedianLatency() {
+        return getMedianLatency(dbLatencyDao);
     }
-    public long getDB95thLatency() {
-        return get95thLatency(this.DBLatencies, this.isDBSorted);
+    public HashMap<String, Long> getDB95thLatency() {
+        return get95thLatency(dbLatencyDao);
     }
-    public long getDB99thLatency() {
-        return get99thLatency(this.DBLatencies, this.isDBSorted);
+    public HashMap<String, Long> getDB99thLatency() {
+        return get99thLatency(dbLatencyDao);
     }
 }
-

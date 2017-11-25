@@ -29,7 +29,6 @@ public class DataController {
     Connection connectionForRecord;
     Connection connectionForMyVert;
     Connection connectionForGET;
-    Stat stat;
 
     public DataController() {
         try {
@@ -41,10 +40,9 @@ public class DataController {
         }
         recordTaskPoolExecutor = Executors.newFixedThreadPool(100);
         myVertTaskPoolExecutor = Executors.newSingleThreadExecutor();
-        stat = new Stat();
     }
 
-    public synchronized void addTaskToWorkQueue(Record record) {
+    public void addPostTaskToWorkQueue(Record record) {
         recordTaskPoolExecutor.submit(new RecordTask(connectionForRecord, record));
         myVertTaskPoolExecutor.submit(new MyVertTask(connectionForMyVert, record));
     }
