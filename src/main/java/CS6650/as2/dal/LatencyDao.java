@@ -15,43 +15,67 @@ public abstract class LatencyDao {
     public abstract HashMap<String, Long> getMeanLatency(Connection connection) throws SQLException;
 
     public void executeInsert(Connection connection, long latency, String server, String sql) {
+        PreparedStatement insertStmt = null;
         try {
-            PreparedStatement insertStmt = connection.prepareStatement(sql);
+            insertStmt = connection.prepareStatement(sql);
+            insertStmt.setQueryTimeout(1);
             insertStmt.setLong(1, latency);
             insertStmt.setString(2, server);
             insertStmt.executeUpdate();
-            insertStmt.close();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                insertStmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void executeQueryAndAddToMap(String sql, HashMap<String, Long> map, Connection connection) {
+        PreparedStatement selectStmt = null;
+        ResultSet rs = null;
         try {
-            PreparedStatement selectStmt = connection.prepareStatement(sql);
-            ResultSet rs = selectStmt.executeQuery();
+            selectStmt = connection.prepareStatement(sql);
+            rs = selectStmt.executeQuery();
+            connection.commit();
             while(rs.next()) {
                 map.put(rs.getString(1), rs.getLong(2));
             }
-            selectStmt.close();
-            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                selectStmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void executeQueryAndAddToList(ArrayList<Long> result, Connection connection, String server, String sql) {
+        PreparedStatement selectStmt = null;
+        ResultSet rs = null;
         try {
-            PreparedStatement selectStmt = connection.prepareStatement(sql);
+            selectStmt = connection.prepareStatement(sql);
             selectStmt.setString(1, server);
-            ResultSet rs = selectStmt.executeQuery();
+            rs = selectStmt.executeQuery();
+            connection.commit();
             while(rs.next()) {
                 result.add(rs.getLong(1));
             }
-            selectStmt.close();
-            rs.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            try {
+                selectStmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

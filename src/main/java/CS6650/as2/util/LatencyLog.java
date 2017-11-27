@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 /**
  * Created by hu_minghao on 11/24/17.
  */
-@NameBinding //用于定义一个运行时的自定义注解
-@Target({ElementType.TYPE,ElementType.METHOD}) //作用范围类和方法
-@Retention(value = RetentionPolicy.RUNTIME)  //运行时有效
-public @interface LatencyLog {
+@NameBinding // Bind NameBinding annotation at APIs
+@Target({ElementType.TYPE,ElementType.METHOD})
+@Retention(value = RetentionPolicy.RUNTIME)
+public @interface LatencyLog { // Used for registering filters
 }

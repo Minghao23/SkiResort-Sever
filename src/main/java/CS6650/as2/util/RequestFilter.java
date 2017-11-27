@@ -9,7 +9,7 @@ import java.io.IOException;
  * Created by hu_minghao on 11/24/17.
  */
 @LatencyLog
-@Provider  //不知道为什么和后请求过滤器冲突,不能同时使用
+@Provider
 public class RequestFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext containerRequestContext) throws IOException {

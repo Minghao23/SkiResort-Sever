@@ -31,7 +31,7 @@ public class Stat {
     Connection connectionForAnalysis;
     HttpLatencyDao httpLatencyDao;
     DBLatencyDao dbLatencyDao;
-    final String SERVER = "3";
+    final String SERVER = "1"; // Change this field to mark the server number
 
     public Stat() {
         try {
@@ -139,7 +139,6 @@ public class Stat {
     public HashMap<String, Long> getHttpMeanLatency() {
         return getMeanLatency(httpLatencyDao);
     }
-
     public HashMap<String, Long> getHttpMedianLatency() {
         return getMedianLatency(httpLatencyDao);
     }
@@ -154,7 +153,6 @@ public class Stat {
     public HashMap<String, Long> getDBMeanLatency() {
         return getMeanLatency(dbLatencyDao);
     }
-
     public HashMap<String, Long> getDBMedianLatency() {
         return getMedianLatency(dbLatencyDao);
     }

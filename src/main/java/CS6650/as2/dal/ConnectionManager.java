@@ -28,6 +28,7 @@ public class ConnectionManager {
 			connection = DriverManager.getConnection(
 			    "jdbc:mysql://" + this.hostName + ":" + this.port + "/" + this.schema,
 			    connectionProperties);
+			connection.setAutoCommit(false);
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;

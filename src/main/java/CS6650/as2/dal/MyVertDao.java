@@ -23,56 +23,70 @@ public class MyVertDao {
 
     public void create(Connection connection, MyVert myVert) throws SQLException {
         String insertMyVert = "INSERT MyVert(SkierID,DayNum,Vertical,LiftTimes) VALUE (?,?,?,?);";
+        PreparedStatement insertStmt = null;
         try {
-            PreparedStatement insertStmt = connection.prepareStatement(insertMyVert,
+            insertStmt = connection.prepareStatement(insertMyVert,
                     Statement.RETURN_GENERATED_KEYS);
             insertStmt.setInt(1, myVert.getSkierID());
             insertStmt.setInt(2, myVert.getDayNum());
             insertStmt.setInt(3, myVert.getVertical());
             insertStmt.setInt(4, myVert.getLiftTimes());
             insertStmt.executeUpdate();
-            insertStmt.close();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            insertStmt.close();
         }
     }
 
     public void update(Connection connection, Record record) throws SQLException {
         String updateMyvert = "UPDATE MyVert SET Vertical=Vertical+?, LiftTimes=LiftTimes+1 WHERE SkierID=? && DayNum=?;";
+        PreparedStatement updateStmt = null;
         try {
-            PreparedStatement updateStmt = connection.prepareStatement(updateMyvert);
+            updateStmt = connection.prepareStatement(updateMyvert);
             updateStmt.setInt(1, getVerticalByLift(record.getLiftID()));
             updateStmt.setInt(2, record.getSkierID());
             updateStmt.setInt(3, record.getDayNum());
             int count = updateStmt.executeUpdate();
+            connection.commit();
             if(count == 0) {
                 create(connection, new MyVert(record.getSkierID(), record.getDayNum(),
                         getVerticalByLift(record.getLiftID()), 1));
             }
-            updateStmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
+        } finally {
+            updateStmt.close();
         }
     }
 
     public MyVert getMyVert(Connection connection, int skierID, int dayNum) throws SQLException {
         MyVert myVert = null;
-        String selectRecords = "SELECT * FROM MyVert WHERE SkierID=? && DayNum=?;";
+        String selectRecords = "SELECT * FROM MyVert WHERE SkierID=? AND DayNum=?;";
+        PreparedStatement selectStmt = null;
+        ResultSet rs = null;
         try {
-            PreparedStatement selectStmt = connection.prepareStatement(selectRecords);
+            selectStmt = connection.prepareStatement(selectRecords);
             selectStmt.setInt(1, skierID);
             selectStmt.setInt(2, dayNum);
-            ResultSet results = selectStmt.executeQuery();
-            if(results.next()) {
-                int vertical = results.getInt("Vertical");
-                int liftTimes = results.getInt("LiftTimes");
+            rs = selectStmt.executeQuery();
+            connection.commit();
+            if(rs.next()) {
+                int vertical = rs.getInt("Vertical");
+                int liftTimes = rs.getInt("LiftTimes");
                 myVert = new MyVert(skierID, dayNum, vertical, liftTimes);
             }
-            selectStmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
-            throw e;
+        } finally {
+            try {
+                selectStmt.close();
+                rs.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return myVert;
     }

@@ -20,7 +20,7 @@ public class DBLatencyDao extends LatencyDao{
     }
 
     public void create(Connection connection, long latency, String server) throws SQLException {
-        String insert = "INSERT DBLatency(Latency, Server) VALUE (?, ?);";
+        String insert = "INSERT DBLatency(Latency,Server) VALUE (?,?);";
         executeInsert(connection, latency, server, insert);
     }
 

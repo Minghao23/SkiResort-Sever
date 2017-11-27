@@ -21,20 +21,23 @@ public class HttpLatencyDao extends LatencyDao{
     }
 
     public void create(Connection connection, long latency, String server) throws SQLException {
-        String insert = "INSERT HttpLatency(Latency, Server) VALUE (?, ?);";
+        String insert = "INSERT HttpLatency(Latency,Server) VALUE (?,?);";
         executeInsert(connection, latency, server, insert);
     }
 
     public void updateHttpFail(Connection connection, String server) throws SQLException {
         String update = "UPDATE HttpFail SET FailNum=FailNum+1 WHERE Server=?;";
+        PreparedStatement updateStmt = null;
         try {
-            PreparedStatement updateStmt = connection.prepareStatement(update);
+            updateStmt = connection.prepareStatement(update);
             updateStmt.setString(1, server);
             updateStmt.executeUpdate();
-            updateStmt.close();
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
             throw e;
+        } finally {
+            updateStmt.close();
         }
     }
 
